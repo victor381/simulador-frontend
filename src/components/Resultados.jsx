@@ -15,6 +15,16 @@ function Resultados({ resultado, onNovaSimulacao }) {
     return `${valor >= 0 ? '+' : ''}${valor.toFixed(2)}%`;
   };
 
+  const formatarMoedaCompacta = (valor) => {
+    if (Math.abs(valor) >= 1000000) {
+      return `R$ ${(valor / 1000000).toFixed(2).replace('.', ',')}M`;
+    }
+    if (Math.abs(valor) >= 1000) {
+      return `R$ ${(valor / 1000).toFixed(2).replace('.', ',')}k`;
+    }
+    return formatarMoeda(valor);
+  };
+
   const exportarPDF = () => {
     const doc = new jsPDF();
     
@@ -96,20 +106,47 @@ function Resultados({ resultado, onNovaSimulacao }) {
   }));
 
   const dadosEconomia = resultado.resultados.map(r => ({
-    ano: r.ano,
-    economia: r.comparativo.economia,
-    gastoAdicional: r.comparativo.gastoAdicional
+    ano: r.ano.toString(),
+    'Economia': r.comparativo.economia > 0 ? r.comparativo.economia : 0,
+    'Gasto Adicional': r.comparativo.gastoAdicional > 0 ? r.comparativo.gastoAdicional : 0
+  }));
+
+  const dadosDetalhado = resultado.resultados.map(r => ({
+    ano: r.ano.toString(),
+    'CBS': r.regimeNovo.cbs,
+    'IBS Estadual': r.regimeNovo.ibsEstadual,
+    'IBS Municipal': r.regimeNovo.ibsMunicipal
   }));
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'start', 
+        marginBottom: '2.5rem',
+        flexWrap: 'wrap',
+        gap: '1.5rem',
+        paddingBottom: '1.5rem',
+        borderBottom: '2px solid #f3f4f6'
+      }}>
         <div>
-          <h2 style={{ marginBottom: '0.5rem', color: 'var(--gray-900)' }}>
+          <h2 style={{ 
+            marginBottom: '0.5rem', 
+            color: '#111827',
+            fontSize: '1.875rem',
+            fontWeight: '700',
+            lineHeight: '1.2'
+          }}>
             Resultado da Simulação
           </h2>
           {resultado.dadosEmpresa && (
-            <p style={{ color: 'var(--gray-600)' }}>
+            <p style={{ 
+              color: '#6b7280',
+              fontSize: '1rem',
+              margin: 0,
+              fontWeight: '500'
+            }}>
               {resultado.dadosEmpresa.razaoSocial}
             </p>
           )}
@@ -119,191 +156,610 @@ function Resultados({ resultado, onNovaSimulacao }) {
             onClick={exportarPDF}
             className="btn"
             style={{
-              background: 'var(--success)',
-              color: 'var(--white)'
+              background: '#10b981',
+              color: 'white',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '0.875rem',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
             }}
+            onMouseEnter={(e) => e.target.style.background = '#059669'}
+            onMouseLeave={(e) => e.target.style.background = '#10b981'}
           >
-            📄 Exportar PDF
+            <span>📄</span> Exportar PDF
           </button>
           <button
             onClick={onNovaSimulacao}
             className="btn"
             style={{
-              background: 'var(--gray-200)',
-              color: 'var(--gray-700)'
+              background: '#f3f4f6',
+              color: '#374151',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '0.875rem',
+              border: '1px solid #e5e7eb',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}
+            onMouseEnter={(e) => e.target.style.background = '#e5e7eb'}
+            onMouseLeave={(e) => e.target.style.background = '#f3f4f6'}
           >
             Nova Simulação
           </button>
         </div>
       </div>
 
-      {/* Resumo Geral */}
+      {/* Resumo Geral - Design Profissional */}
       <div style={{
-        background: 'linear-gradient(135deg, var(--primary) 0%, #764ba2 100%)',
-        color: 'white',
+        background: 'white',
+        borderRadius: '16px',
         padding: '2rem',
-        borderRadius: '12px',
-        marginBottom: '2rem'
+        marginBottom: '2.5rem',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e5e7eb'
       }}>
-        <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>
-          Resumo Geral ({resultado.parametros.anoInicio}-{resultado.parametros.anoFim})
-        </h3>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1.5rem'
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: '2rem',
+          paddingBottom: '1.5rem',
+          borderBottom: '2px solid #f3f4f6'
         }}>
           <div>
-            <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0, marginBottom: '0.25rem', color: '#111827' }}>
+              Resumo Geral
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
+              Período: {resultado.parametros.anoInicio} - {resultado.parametros.anoFim}
+            </p>
+          </div>
+          <div style={{
+            background: resultado.resumo.beneficioLiquido ? '#d1fae5' : '#fee2e2',
+            color: resultado.resumo.beneficioLiquido ? '#065f46' : '#991b1b',
+            padding: '0.5rem 1rem',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            {resultado.resumo.beneficioLiquido ? '✓' : '⚠'} {resultado.resumo.beneficioLiquido ? 'Benefício Líquido' : 'Custo Adicional'}
+          </div>
+        </div>
+        
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '1.5rem',
+          width: '100%',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
+        }}
+        className="resumo-grid"
+        >
+          {/* Economia Total */}
+          <div style={{
+            background: '#f9fafb',
+            padding: '1.5rem',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            transition: 'all 0.2s',
+            minWidth: 0,
+            overflow: 'hidden'
+          }}>
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', marginBottom: '0.75rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Economia Total
             </div>
-            <div style={{ fontSize: '2rem', fontWeight: '700' }}>
-              {formatarMoeda(resultado.resumo.totalEconomia)}
+            <div style={{ 
+              fontSize: 'clamp(1.125rem, 3.5vw, 1.75rem)', 
+              fontWeight: '700', 
+              lineHeight: '1.2', 
+              marginBottom: '0.5rem', 
+              color: '#111827',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {formatarMoedaCompacta(resultado.resumo.totalEconomia)}
             </div>
             {resultado.resumo.economiaPercentual > 0 && (
-              <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {resultado.resumo.economiaPercentual.toFixed(2)}% do faturamento
               </div>
             )}
           </div>
-          <div>
-            <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>
+
+          {/* Gasto Adicional Total */}
+          <div style={{
+            background: '#f9fafb',
+            padding: '1.5rem',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            transition: 'all 0.2s',
+            minWidth: 0,
+            overflow: 'hidden'
+          }}>
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', marginBottom: '0.75rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Gasto Adicional Total
             </div>
-            <div style={{ fontSize: '2rem', fontWeight: '700' }}>
-              {formatarMoeda(resultado.resumo.totalGasto)}
+            <div style={{ 
+              fontSize: 'clamp(1.125rem, 3.5vw, 1.75rem)', 
+              fontWeight: '700', 
+              lineHeight: '1.2', 
+              marginBottom: '0.5rem', 
+              color: '#111827',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {formatarMoedaCompacta(resultado.resumo.totalGasto)}
             </div>
             {resultado.resumo.gastoPercentual > 0 && (
-              <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {resultado.resumo.gastoPercentual.toFixed(2)}% do faturamento
               </div>
             )}
           </div>
-          <div>
-            <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>
+
+          {/* Saldo Final - Destaque */}
+          <div style={{
+            background: resultado.resumo.beneficioLiquido 
+              ? 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)' 
+              : 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+            padding: '1.5rem',
+            borderRadius: '12px',
+            border: `2px solid ${resultado.resumo.beneficioLiquido ? '#10b981' : '#ef4444'}`,
+            transition: 'all 0.2s',
+            boxShadow: resultado.resumo.beneficioLiquido 
+              ? '0 4px 6px -1px rgba(16, 185, 129, 0.1)' 
+              : '0 4px 6px -1px rgba(239, 68, 68, 0.1)',
+            minWidth: 0,
+            overflow: 'hidden'
+          }}>
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: resultado.resumo.beneficioLiquido ? '#065f46' : '#991b1b', marginBottom: '0.75rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Saldo Final
             </div>
             <div style={{ 
-              fontSize: '2rem', 
-              fontWeight: '700',
-              color: resultado.resumo.beneficioLiquido ? '#10b981' : '#ef4444'
+              fontSize: 'clamp(1.125rem, 3.5vw, 1.75rem)', 
+              fontWeight: '800',
+              lineHeight: '1.2',
+              marginBottom: '0.5rem',
+              color: resultado.resumo.beneficioLiquido ? '#065f46' : '#991b1b',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              maxWidth: '100%',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }}>
-              {formatarMoeda(resultado.resumo.saldoFinal)}
+              {formatarMoedaCompacta(resultado.resumo.saldoFinal)}
             </div>
-            <div style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-              {resultado.resumo.beneficioLiquido ? '✅ Benefício Líquido' : '⚠️ Custo Adicional'}
+            <div style={{ 
+              fontSize: '0.75rem', 
+              fontWeight: '600',
+              color: resultado.resumo.beneficioLiquido ? '#065f46' : '#991b1b',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {resultado.resumo.beneficioLiquido ? '✓' : '⚠'} {resultado.resumo.beneficioLiquido ? 'Benefício' : 'Custo Adicional'}
             </div>
           </div>
-          <div>
-            <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>
+
+          {/* Anos com Benefício */}
+          <div style={{
+            background: '#f9fafb',
+            padding: '1.5rem',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            transition: 'all 0.2s',
+            minWidth: 0,
+            overflow: 'hidden'
+          }}>
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', marginBottom: '0.75rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Anos com Benefício
             </div>
-            <div style={{ fontSize: '2rem', fontWeight: '700' }}>
+            <div style={{ 
+              fontSize: 'clamp(1.25rem, 4vw, 2rem)', 
+              fontWeight: '700', 
+              lineHeight: '1.2', 
+              marginBottom: '0.5rem', 
+              color: '#111827',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              maxWidth: '100%'
+            }}>
               {resultado.resumo.anosComBeneficio} / {resultado.resultados.length}
             </div>
-            <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '0.25rem' }}>
-              {resultado.resumo.anosComCusto} anos com custo adicional
+            <div style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {resultado.resumo.anosComCusto} anos com custo
             </div>
           </div>
         </div>
       </div>
 
       {/* Gráficos */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--gray-900)' }}>
+      <div style={{ 
+        marginBottom: '2.5rem',
+        background: 'white',
+        padding: '2rem',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <h3 style={{ 
+          marginBottom: '1.5rem', 
+          color: '#111827', 
+          fontSize: '1.25rem', 
+          fontWeight: '700',
+          paddingBottom: '1rem',
+          borderBottom: '1px solid #f3f4f6'
+        }}>
           Comparativo de Impostos por Ano
         </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={dadosGrafico}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="ano" />
-            <YAxis tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`} />
+        <ResponsiveContainer width="100%" height={400}>
+          <LineChart data={dadosGrafico} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis 
+              dataKey="ano" 
+              tick={{ fill: '#6b7280', fontSize: 12, fontWeight: '500' }}
+              axisLine={{ stroke: '#d1d5db' }}
+            />
+            <YAxis 
+              tickFormatter={(value) => {
+                if (value === 0) return 'R$ 0';
+                if (value >= 1000000) return `R$ ${(value / 1000000).toFixed(1)}M`;
+                if (value >= 1000) return `R$ ${(value / 1000).toFixed(0)}k`;
+                return `R$ ${value.toFixed(0)}`;
+              }}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              axisLine={{ stroke: '#d1d5db' }}
+            />
             <Tooltip 
               formatter={(value) => formatarMoeda(value)}
-              labelStyle={{ color: 'var(--gray-900)' }}
+              labelStyle={{ color: '#111827', fontWeight: 600, marginBottom: '4px' }}
+              contentStyle={{ 
+                backgroundColor: 'white', 
+                border: '1px solid #e5e7eb', 
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}
             />
-            <Legend />
-            <Line type="monotone" dataKey="Regime Atual" stroke="#ef4444" strokeWidth={2} />
-            <Line type="monotone" dataKey="Regime Novo" stroke="#10b981" strokeWidth={2} />
+            <Legend 
+              wrapperStyle={{ paddingTop: '20px' }}
+              iconType="line"
+            />
+            <Line 
+              type="monotone" 
+              dataKey="Regime Atual" 
+              stroke="#ef4444" 
+              strokeWidth={3}
+              dot={{ fill: '#ef4444', r: 5 }}
+              activeDot={{ r: 7 }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="Regime Novo" 
+              stroke="#10b981" 
+              strokeWidth={3}
+              dot={{ fill: '#10b981', r: 5 }}
+              activeDot={{ r: 7 }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="Diferença" 
+              stroke="#f59e0b" 
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={{ fill: '#f59e0b', r: 4 }}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      <div style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--gray-900)' }}>
-          Economia vs Gasto Adicional
+      <div style={{ 
+        marginBottom: '2.5rem',
+        background: 'white',
+        padding: '2rem',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <h3 style={{ 
+          marginBottom: '1.5rem', 
+          color: '#111827', 
+          fontSize: '1.25rem', 
+          fontWeight: '700',
+          paddingBottom: '1rem',
+          borderBottom: '1px solid #f3f4f6'
+        }}>
+          Economia vs Gasto Adicional por Ano
         </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={dadosEconomia}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="ano" />
-            <YAxis tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`} />
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={dadosEconomia} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis 
+              dataKey="ano" 
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              axisLine={{ stroke: '#d1d5db' }}
+            />
+            <YAxis 
+              tickFormatter={(value) => {
+                if (value === 0) return 'R$ 0';
+                if (value >= 1000000) return `R$ ${(value / 1000000).toFixed(1)}M`;
+                if (value >= 1000) return `R$ ${(value / 1000).toFixed(0)}k`;
+                return `R$ ${value.toFixed(0)}`;
+              }}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              axisLine={{ stroke: '#d1d5db' }}
+            />
+            <Tooltip 
+              formatter={(value, name) => {
+                if (value === 0) return null;
+                return [formatarMoeda(value), name];
+              }}
+              labelStyle={{ color: '#111827', fontWeight: 600, marginBottom: '4px' }}
+              contentStyle={{ 
+                backgroundColor: 'white', 
+                border: '1px solid #e5e7eb', 
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}
+            />
+            <Legend 
+              wrapperStyle={{ paddingTop: '20px' }}
+              iconType="rect"
+            />
+            <Bar 
+              dataKey="Economia" 
+              fill="#10b981" 
+              name="Economia" 
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar 
+              dataKey="Gasto Adicional" 
+              fill="#ef4444" 
+              name="Gasto Adicional"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div style={{ 
+        marginBottom: '2.5rem',
+        background: 'white',
+        padding: '2rem',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <h3 style={{ 
+          marginBottom: '1.5rem', 
+          color: '#111827', 
+          fontSize: '1.25rem', 
+          fontWeight: '700',
+          paddingBottom: '1rem',
+          borderBottom: '1px solid #f3f4f6'
+        }}>
+          Composição dos Impostos do Novo Regime
+        </h3>
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={dadosDetalhado} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis 
+              dataKey="ano" 
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              axisLine={{ stroke: '#d1d5db' }}
+            />
+            <YAxis 
+              tickFormatter={(value) => {
+                if (value === 0) return 'R$ 0';
+                if (value >= 1000000) return `R$ ${(value / 1000000).toFixed(1)}M`;
+                if (value >= 1000) return `R$ ${(value / 1000).toFixed(0)}k`;
+                return `R$ ${value.toFixed(0)}`;
+              }}
+              tick={{ fill: '#6b7280', fontSize: 12 }}
+              axisLine={{ stroke: '#d1d5db' }}
+            />
             <Tooltip 
               formatter={(value) => formatarMoeda(value)}
-              labelStyle={{ color: 'var(--gray-900)' }}
+              labelStyle={{ color: '#111827', fontWeight: 600, marginBottom: '4px' }}
+              contentStyle={{ 
+                backgroundColor: 'white', 
+                border: '1px solid #e5e7eb', 
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+              }}
             />
-            <Legend />
-            <Bar dataKey="economia" fill="#10b981" name="Economia" />
-            <Bar dataKey="gastoAdicional" fill="#ef4444" name="Gasto Adicional" />
+            <Legend 
+              wrapperStyle={{ paddingTop: '20px' }}
+              iconType="rect"
+            />
+            <Bar dataKey="CBS" stackId="a" fill="#3b82f6" name="CBS" />
+            <Bar dataKey="IBS Estadual" stackId="a" fill="#8b5cf6" name="IBS Estadual" />
+            <Bar dataKey="IBS Municipal" stackId="a" fill="#ec4899" name="IBS Municipal" />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Tabela Detalhada */}
-      <div>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--gray-900)' }}>
+      <div style={{
+        background: 'white',
+        padding: '2rem',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <h3 style={{ 
+          marginBottom: '1.5rem', 
+          color: '#111827', 
+          fontSize: '1.25rem', 
+          fontWeight: '700',
+          paddingBottom: '1rem',
+          borderBottom: '1px solid #f3f4f6'
+        }}>
           Detalhamento por Ano
         </h3>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white' }}>
             <thead>
-              <tr style={{ background: 'var(--gray-100)' }}>
-                <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '2px solid var(--gray-300)' }}>Ano</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', borderBottom: '2px solid var(--gray-300)' }}>Regime Atual</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', borderBottom: '2px solid var(--gray-300)' }}>CBS</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', borderBottom: '2px solid var(--gray-300)' }}>IBS Estadual</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', borderBottom: '2px solid var(--gray-300)' }}>IBS Municipal</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', borderBottom: '2px solid var(--gray-300)' }}>Total Novo</th>
-                <th style={{ padding: '0.75rem', textAlign: 'right', borderBottom: '2px solid var(--gray-300)' }}>Diferença</th>
-                <th style={{ padding: '0.75rem', textAlign: 'center', borderBottom: '2px solid var(--gray-300)' }}>Status</th>
+              <tr style={{ background: '#f9fafb' }}>
+                <th style={{ 
+                  padding: '1rem', 
+                  textAlign: 'left', 
+                  borderBottom: '2px solid #e5e7eb',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#6b7280',
+                  fontWeight: '600'
+                }}>Ano</th>
+                <th style={{ 
+                  padding: '1rem', 
+                  textAlign: 'right', 
+                  borderBottom: '2px solid #e5e7eb',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#6b7280',
+                  fontWeight: '600'
+                }}>Regime Atual</th>
+                <th style={{ 
+                  padding: '1rem', 
+                  textAlign: 'right', 
+                  borderBottom: '2px solid #e5e7eb',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#6b7280',
+                  fontWeight: '600'
+                }}>CBS</th>
+                <th style={{ 
+                  padding: '1rem', 
+                  textAlign: 'right', 
+                  borderBottom: '2px solid #e5e7eb',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#6b7280',
+                  fontWeight: '600'
+                }}>IBS Estadual</th>
+                <th style={{ 
+                  padding: '1rem', 
+                  textAlign: 'right', 
+                  borderBottom: '2px solid #e5e7eb',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#6b7280',
+                  fontWeight: '600'
+                }}>IBS Municipal</th>
+                <th style={{ 
+                  padding: '1rem', 
+                  textAlign: 'right', 
+                  borderBottom: '2px solid #e5e7eb',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#6b7280',
+                  fontWeight: '600'
+                }}>Total Novo</th>
+                <th style={{ 
+                  padding: '1rem', 
+                  textAlign: 'right', 
+                  borderBottom: '2px solid #e5e7eb',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#6b7280',
+                  fontWeight: '600'
+                }}>Diferença</th>
+                <th style={{ 
+                  padding: '1rem', 
+                  textAlign: 'center', 
+                  borderBottom: '2px solid #e5e7eb',
+                  fontSize: '0.75rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#6b7280',
+                  fontWeight: '600'
+                }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {resultado.resultados.map((r, index) => (
                 <tr key={r.ano} style={{ 
-                  borderBottom: '1px solid var(--gray-200)',
-                  background: index % 2 === 0 ? 'var(--white)' : 'var(--gray-50)'
-                }}>
-                  <td style={{ padding: '0.75rem', fontWeight: '600' }}>{r.ano}</td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                  borderBottom: '1px solid #f3f4f6',
+                  background: index % 2 === 0 ? 'white' : '#f9fafb',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'white' : '#f9fafb'}
+                >
+                  <td style={{ padding: '1rem', fontWeight: '600', color: '#111827' }}>
+                    {r.ano}
+                    {r.regimeNovo.fase && (
+                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 'normal', marginTop: '0.25rem' }}>
+                        {r.regimeNovo.fase}
+                      </div>
+                    )}
+                  </td>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#374151', fontWeight: '500' }}>
                     {formatarMoeda(r.regimeAtual.imposto)}
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#374151', fontWeight: '500' }}>
                     {formatarMoeda(r.regimeNovo.cbs)}
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#374151', fontWeight: '500' }}>
                     {formatarMoeda(r.regimeNovo.ibsEstadual)}
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                  <td style={{ padding: '1rem', textAlign: 'right', color: '#374151', fontWeight: '500' }}>
                     {formatarMoeda(r.regimeNovo.ibsMunicipal)}
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>
+                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#111827' }}>
                     {formatarMoeda(r.regimeNovo.total)}
                   </td>
                   <td style={{ 
-                    padding: '0.75rem', 
+                    padding: '1rem', 
                     textAlign: 'right',
                     fontWeight: '600',
-                    color: r.comparativo.beneficio ? 'var(--success)' : 'var(--danger)'
+                    color: r.comparativo.beneficio ? '#059669' : '#dc2626'
                   }}>
                     {formatarMoeda(r.comparativo.diferenca)}
-                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 'normal', marginTop: '0.25rem' }}>
                       {formatarPercentual(r.comparativo.percentualVariacao)}
                     </div>
                   </td>
-                  <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                    <span className={`badge ${r.comparativo.beneficio ? 'badge-success' : 'badge-danger'}`}>
+                  <td style={{ padding: '1rem', textAlign: 'center' }}>
+                    <span style={{
+                      display: 'inline-block',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '9999px',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      background: r.comparativo.beneficio ? '#d1fae5' : '#fee2e2',
+                      color: r.comparativo.beneficio ? '#065f46' : '#991b1b'
+                    }}>
                       {r.comparativo.beneficio ? 'Benefício' : 'Custo'}
                     </span>
                   </td>
@@ -316,12 +772,14 @@ function Resultados({ resultado, onNovaSimulacao }) {
 
       {/* Informações Adicionais */}
       <div style={{
-        marginTop: '2rem',
-        padding: '1.5rem',
-        background: 'var(--gray-50)',
-        borderRadius: '8px',
+        marginTop: '2.5rem',
+        padding: '2rem',
+        background: 'white',
+        borderRadius: '16px',
         fontSize: '0.875rem',
-        color: 'var(--gray-600)'
+        color: '#6b7280',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e5e7eb'
       }}>
         <p style={{ marginBottom: '0.5rem' }}>
           <strong>Parâmetros da Simulação:</strong>
@@ -355,7 +813,6 @@ function Resultados({ resultado, onNovaSimulacao }) {
         <div style={{ 
           marginTop: '1rem', 
           padding: '1rem', 
-          background: 'var(--warning)', 
           background: 'rgba(245, 158, 11, 0.1)',
           borderRadius: '6px',
           borderLeft: '4px solid var(--warning)'

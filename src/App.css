@@ -67,6 +67,18 @@
 
 .card {
   animation: fadeIn 0.3s ease-out;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.1);
 }
 
 /* Scrollbar personalizada */
@@ -133,6 +145,26 @@
   .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .resumo-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .resumo-grid > div {
+    min-width: 0;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .resumo-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .resumo-grid > div {
+    min-width: 0;
+    overflow: hidden;
   }
 }
 
