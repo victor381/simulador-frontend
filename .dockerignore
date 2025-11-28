@@ -1,0 +1,52 @@
+# Dependências
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Build
+dist
+build
+.vite
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Documentação
+README.md
+*.md
+
+# Testes
+test
+tests
+__tests__
+*.test.js
+*.spec.js
+*.test.jsx
+*.spec.jsx
+
+# Outros
+coverage
+.nyc_output
+
